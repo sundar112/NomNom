@@ -13,15 +13,14 @@
     "start": "concurrently --kill-others-on-fail --names \"backend,frontend\" --prefix-colors \"magenta,cyan\" \"npm:start:backend\" \"npm:start:frontend\"",
     "start:backend": "npm --prefix examples/restaurant-marketplace run start",
     "start:frontend": "npm --prefix examples/fofood-store-main run start",
-    "db:setup": "npm --prefix examples/restaurant-marketplace exec medusa db:setup",
-    "db:migrate": "npm --prefix examples/restaurant-marketplace exec medusa db:migrate",
+    "db:migrate": "npm --prefix examples/restaurant-marketplace run db:migrate",
     "seed": "npm --prefix examples/restaurant-marketplace run seed",
-    "install:all": "npm install && npm --prefix examples/fofood-store-main install && yarn --cwd examples/restaurant-marketplace install"
+    "install:all": "npm install && npm --prefix examples/fofood-store-main install && npm --prefix examples/restaurant-marketplace install"
   },
   "devDependencies": {
     "concurrently": "^9.1.2"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=20 <21"
   }
 }
