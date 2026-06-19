@@ -1,0 +1,27 @@
+{
+  "name": "fofood-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Monorepo orchestrating the Medusa restaurant marketplace (backend) and the FoFood Next.js storefront (frontend).",
+  "scripts": {
+    "dev": "concurrently --kill-others-on-fail --names \"backend,frontend\" --prefix-colors \"magenta,cyan\" \"npm:dev:backend\" \"npm:dev:frontend\"",
+    "dev:backend": "npm --prefix examples/restaurant-marketplace run dev",
+    "dev:frontend": "npm --prefix examples/fofood-store-main run dev",
+    "build": "npm run build:backend && npm run build:frontend",
+    "build:backend": "npm --prefix examples/restaurant-marketplace run build",
+    "build:frontend": "npm --prefix examples/fofood-store-main run build",
+    "start": "concurrently --kill-others-on-fail --names \"backend,frontend\" --prefix-colors \"magenta,cyan\" \"npm:start:backend\" \"npm:start:frontend\"",
+    "start:backend": "npm --prefix examples/restaurant-marketplace run start",
+    "start:frontend": "npm --prefix examples/fofood-store-main run start",
+    "db:setup": "npm --prefix examples/restaurant-marketplace exec medusa db:setup",
+    "db:migrate": "npm --prefix examples/restaurant-marketplace exec medusa db:migrate",
+    "seed": "npm --prefix examples/restaurant-marketplace run seed",
+    "install:all": "npm install && npm --prefix examples/fofood-store-main install && yarn --cwd examples/restaurant-marketplace install"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
