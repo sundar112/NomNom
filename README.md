@@ -66,9 +66,47 @@ Stopping the command (`Ctrl+C`) stops both apps. If either app crashes, the othe
 | `npm run db:migrate` | Run Medusa database migrations + sync module links |
 | `npm run seed` | Seed demo data into the backend |
 
+## Storefront ↔ backend integration
+
+The FoFood storefront is wired to the Medusa backend (no more static JSON):
+
+| Feature | Frontend | Backend endpoint |
+|---------|----------|------------------|
+| Menu / categories / product detail | Home, `/menu`, `/menu/[handle]` (server-rendered) | `GET /restaurants?currency_code=eur` (restaurant + linked products) |
+| Cart | `/my-cart`, navbar badge, add-to-cart buttons | stock `POST/GET /store/carts` (cart id in `localStorage`) |
+| Checkout → delivery | `/checkout` → `/order/[id]` tracking | sets address/shipping on the cart, then `POST /store/deliveries` (starts the restaurant delivery workflow); tracking polls `GET /store/deliveries/:id` |
+| Favorites | `/my-favorites` | client-side `localStorage`, keyed by product id |
+| Blog | `/blog`, `/blog/[handle]` (server-rendered) | `GET /store/blog`, `GET /store/blog/:handle` (custom `content` module) |
+| Contact | `/contact` form | `POST /store/contact` (persists a `ContactMessage`) |
+
+Payment is **collected on delivery** — the order is created inside the
+restaurant's delivery workflow once a driver claims it. Advancing a delivery
+(accept / prepare / ready / pick-up / complete) is done from the Medusa Admin /
+driver API and is out of scope for the storefront UI.
+
+### Storefront environment
+
+The storefront reads `examples/fofood-store-main/.env.local`:
+
+```
+NEXT_PUBLIC_MEDUSA_BACKEND_URL=http://localhost:9000
+NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY=pk_...
+NEXT_PUBLIC_MEDUSA_REGION_ID=reg_...
+NEXT_PUBLIC_RESTAURANT_ID=...
+```
+
+The `seed` script (`npm run seed`) is **idempotent** and prints the publishable
+key, region id and restaurant id to copy into `.env.local`. It seeds the FoFood
+restaurant, a food menu (Burgers, Pizza, Pasta, Salads, Desserts, Drinks),
+6 blog posts, and removes any leftover non-food products/categories.
+
+Product images come from `images.unsplash.com` (allow-listed in
+[`next.config.js`](examples/fofood-store-main/next.config.js)).
+
 ## Notes
 
 - The backend's `STORE_CORS` already allows `http://localhost:3000` so the storefront can call the Medusa Store API.
+- Menu and blog data are fetched **server-side** in Next.js because the custom `/restaurants` route is not under `/store` (and therefore not covered by `STORE_CORS`). Cart, delivery and contact calls run client-side against `/store/*`.
 - Each app keeps its own config and dependencies; the root only orchestrates them via `npm --prefix`.
 
 ## Why npm and Node 20

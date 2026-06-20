@@ -1,8 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
-import FoodData from "@/public/json/food.json";
+import { MenuCategory } from "@/lib/medusa";
 
-export default function Explore() {
+export default function Explore({
+	categories,
+}: {
+	categories: MenuCategory[];
+}) {
 	return (
 		<section id="explore">
 			<div className="mx-auto px-11 pb-10 pt-20 lg:w-5/6 lg:pb-20 lg:pt-36">
@@ -13,30 +17,25 @@ export default function Explore() {
 					Our Delicious Menu
 				</h2>
 				<div className="grid grid-cols-1 gap-10 pt-10 lg:grid-cols-3">
-					{FoodData.map(
-						(food, index) =>
-							food.category !== "All" && (
-								<Link
-									href="/"
-									key={index}
-									className="rounded-2xl border border-secondary-10 px-16 py-5 transition duration-300 hover:border-primary-100 hover:shadow-lg hover:shadow-[#050C11]/20"
-								>
-									<Image
-										src={`/assets/img/${food.image}`}
-										width={130}
-										height={130}
-										alt="Food Menu"
-										className="mx-auto"
-									/>
-									<h5 className="text-heading-5 text-center">
-										{food.category}
-									</h5>
-									<h3 className="text-caption-2 text-center text-primary-100">
-										{food.items.length} Menu
-									</h3>
-								</Link>
-							)
-					)}
+					{categories.map((category) => (
+						<Link
+							href="/menu"
+							key={category.id}
+							className="rounded-2xl border border-secondary-10 px-16 py-5 transition duration-300 hover:border-primary-100 hover:shadow-lg hover:shadow-[#050C11]/20"
+						>
+							<Image
+								src={category.image}
+								width={130}
+								height={130}
+								alt={category.name}
+								className="mx-auto h-[130px] w-[130px] rounded-2xl object-cover"
+							/>
+							<h5 className="text-heading-5 text-center">{category.name}</h5>
+							<h3 className="text-caption-2 text-center text-primary-100">
+								{category.count} Menu
+							</h3>
+						</Link>
+					))}
 				</div>
 			</div>
 		</section>

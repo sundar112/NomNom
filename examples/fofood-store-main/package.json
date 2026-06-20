@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@headlessui/react": "^1.7.15",
+    "@medusajs/js-sdk": "^2.14.0",
+    "@medusajs/types": "^2.14.0",
     "@types/node": "20.2.1",
     "@types/react": "18.2.6",
     "@types/react-dom": "18.2.4",

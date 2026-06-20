@@ -1,8 +1,12 @@
 import Articles from "@/components/articles";
 import PageTitle from "@/components/page-title";
-import ArticlesData from "@/public/json/articles.json";
+import { getBlogPosts } from "@/lib/medusa";
 
-export default function Blog() {
+export const revalidate = 60;
+
+export default async function Blog() {
+	const posts = await getBlogPosts();
+
 	return (
 		<>
 			<PageTitle path="Blog" title="Our Blog" />
@@ -12,14 +16,16 @@ export default function Blog() {
 					<h2 className="text-heading-4 lg:text-heading-2 text-secondary-100">
 						Latest Post
 					</h2>
-					<Articles data={ArticlesData.slice(0, 6)} />
+					<Articles data={posts.slice(0, 6)} />
 				</div>
-				<div className="pb-20 pt-10 lg:pb-40 lg:pt-20">
-					<h2 className="text-heading-4 lg:text-heading-2 text-secondary-100">
-						Most Popular Post
-					</h2>
-					<Articles data={ArticlesData.slice(0, 6)} />
-				</div>
+				{posts.length > 3 && (
+					<div className="pb-20 pt-10 lg:pb-40 lg:pt-20">
+						<h2 className="text-heading-4 lg:text-heading-2 text-secondary-100">
+							Most Popular Post
+						</h2>
+						<Articles data={posts.slice(0, 6).reverse()} />
+					</div>
+				)}
 			</div>
 		</>
 	);

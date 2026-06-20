@@ -20,6 +20,9 @@ module.exports = defineConfig({
     {
       resolve: "./src/modules/delivery"
     },
+    {
+      resolve: "./src/modules/content"
+    },
     // Recommended
     // {
     //   resolve: "@medusajs/workflow-engine-redis",

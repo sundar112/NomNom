@@ -1,7 +1,11 @@
 import Articles from "../articles";
-import ArticlesData from "@/public/json/articles.json";
+import { getBlogPosts } from "@/lib/medusa";
 
-export default function OurBlog() {
+export default async function OurBlog() {
+	const posts = await getBlogPosts();
+
+	if (!posts.length) return null;
+
 	return (
 		<section id="our-blog">
 			<div className="pb-20 pt-10 lg:pb-36 lg:pt-20">
@@ -11,7 +15,7 @@ export default function OurBlog() {
 				<h2 className="text-heading-4 lg:text-heading-2 mt-2 text-center">
 					Latest Post
 				</h2>
-				<Articles data={ArticlesData.slice(0, 3)} />
+				<Articles data={posts.slice(0, 3)} />
 			</div>
 		</section>
 	);

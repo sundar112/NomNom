@@ -1,9 +1,28 @@
 "use client";
 
+import { useState } from "react";
 import { Message, Call, TimeCircle } from "react-iconly";
 import PageTitle from "@/components/page-title";
+import { submitContactMessage } from "@/lib/medusa";
 
 export default function Contact() {
+	const [form, setForm] = useState({ name: "", email: "", message: "" });
+	const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">(
+		"idle"
+	);
+
+	const handleSubmit = async (e: React.FormEvent) => {
+		e.preventDefault();
+		setStatus("sending");
+		try {
+			await submitContactMessage(form);
+			setStatus("sent");
+			setForm({ name: "", email: "", message: "" });
+		} catch {
+			setStatus("error");
+		}
+	};
+
 	return (
 		<>
 			<PageTitle path="Contact us" title="Contact us" />
@@ -56,24 +75,49 @@ export default function Contact() {
 								Please use the contact details provided below to get in touch
 								with us:
 							</h5>
-							<form className="mt-8 space-y-6">
+							<form className="mt-8 space-y-6" onSubmit={handleSubmit}>
 								<input
 									type="text"
+									required
+									value={form.name}
+									onChange={(e) => setForm({ ...form, name: e.target.value })}
 									className="text-body-2-medium w-full rounded-[32px] border border-secondary-10 px-10 py-5 text-secondary-100 placeholder:text-secondary-100 focus:outline-primary-100"
 									placeholder="Name"
 								/>
 								<input
-									type="text"
+									type="email"
+									required
+									value={form.email}
+									onChange={(e) => setForm({ ...form, email: e.target.value })}
 									className="text-body-2-medium w-full rounded-[32px] border border-secondary-10 px-10 py-5 text-secondary-100 placeholder:text-secondary-100 focus:outline-primary-100"
 									placeholder="Email Address"
 								/>
 								<textarea
 									rows={14}
+									required
+									value={form.message}
+									onChange={(e) =>
+										setForm({ ...form, message: e.target.value })
+									}
 									className="text-body-2-medium w-full rounded-[32px] border border-secondary-10 px-10 py-5 text-secondary-100 placeholder:text-secondary-100 focus:outline-primary-100"
 									placeholder="Message"
 								/>
-								<button type="submit" className="btn-pink-solid w-full">
-									Send
+								{status === "sent" && (
+									<p className="text-body-2-medium text-green-600">
+										Thanks for reaching out — we&lsquo;ll be in touch soon!
+									</p>
+								)}
+								{status === "error" && (
+									<p className="text-body-2-medium text-[#FF0A0A]">
+										Something went wrong. Please try again.
+									</p>
+								)}
+								<button
+									type="submit"
+									disabled={status === "sending"}
+									className="btn-pink-solid w-full disabled:opacity-60"
+								>
+									{status === "sending" ? "Sending..." : "Send"}
 								</button>
 							</form>
 						</div>

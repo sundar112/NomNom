@@ -5,6 +5,7 @@ import AboutUs from "@/components/sections/about-us";
 import PopularMenu from "@/components/sections/popular-menu";
 import Testimonial from "@/components/sections/testimonial";
 import OurBlog from "@/components/sections/our-blog";
+import { getMenu } from "@/lib/medusa";
 
 import Cake from "@/public/assets/img/hero-cake.png";
 import Avatar1 from "@/public/assets/img/avatar-1.png";
@@ -14,7 +15,13 @@ import Avatar4 from "@/public/assets/img/avatar-4.png";
 import ButtonGooglePlay from "@/public/assets/img/btn-google-play.png";
 import ButtonAppStore from "@/public/assets/img/btn-app-store.png";
 
-export default function Home() {
+// Cache the rendered page and revalidate it at most once per minute (ISR),
+// instead of re-fetching the backend on every single navigation.
+export const revalidate = 60;
+
+export default async function Home() {
+	const menu = await getMenu();
+
 	return (
 		<>
 			{/* Start Main Section - Hero */}
@@ -99,7 +106,7 @@ export default function Home() {
 			{/* Start Content Section */}
 			<div className="container">
 				{/* Section 1 - Explore */}
-				<Explore />
+				<Explore categories={menu.categories} />
 
 				{/* Section 2 - About us */}
 				<AboutUs>
@@ -114,7 +121,7 @@ export default function Home() {
 				</AboutUs>
 
 				{/* Section 3 - Popular Menu */}
-				<PopularMenu />
+				<PopularMenu items={menu.items} />
 
 				{/* Section 4 - Testimonial */}
 				<Testimonial />

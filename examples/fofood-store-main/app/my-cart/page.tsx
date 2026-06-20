@@ -1,140 +1,137 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { RxTrash } from "react-icons/rx";
 import { MdKeyboardArrowLeft } from "react-icons/md";
+import { BiMinus, BiPlus } from "react-icons/bi";
 import PageTitle from "@/components/page-title";
-import QuantityInput from "@/components/quantity-input";
+import { useCart } from "@/lib/cart-context";
+import { formatPrice } from "@/lib/medusa";
+
+function QtyControl({
+	quantity,
+	onChange,
+}: {
+	quantity: number;
+	onChange: (q: number) => void;
+}) {
+	return (
+		<div className="flex">
+			<button
+				className="rounded-s-[4px] border border-[#EDECEC] p-3 transition hover:border-primary-100 hover:bg-primary-100 hover:text-white"
+				onClick={() => onChange(Math.max(1, quantity - 1))}
+			>
+				<BiMinus />
+			</button>
+			<input
+				type="number"
+				className="w-14 border border-secondary-10 px-4 text-center"
+				value={quantity}
+				min={1}
+				readOnly
+			/>
+			<button
+				className="rounded-e-[4px] border border-[#EDECEC] p-3 transition hover:border-primary-100 hover:bg-primary-100 hover:text-white"
+				onClick={() => onChange(quantity + 1)}
+			>
+				<BiPlus />
+			</button>
+		</div>
+	);
+}
 
 export default function MyCart() {
+	const { cart, loading, updateItem, removeItem } = useCart();
+
+	const items: any[] = cart?.items ?? [];
+	const currency = cart?.currency_code ?? "eur";
+	const subtotal = cart?.item_subtotal ?? cart?.subtotal ?? 0;
+	const total = cart?.total ?? subtotal;
+
+	if (!loading && items.length === 0) {
+		return (
+			<>
+				<PageTitle bgColor="bg-white" path="My Cart" title="My Cart" />
+				<div className="container">
+					<div className="flex flex-col items-center py-24 text-center">
+						<h3 className="text-heading-4 text-secondary-100">
+							Your cart is empty
+						</h3>
+						<p className="text-body-1 mt-2 text-secondary-50">
+							Browse the menu and add some delicious food to your cart.
+						</p>
+						<Link href="/menu" className="btn-pink-solid mt-8">
+							Browse Menu
+						</Link>
+					</div>
+				</div>
+			</>
+		);
+	}
+
 	return (
 		<>
 			<PageTitle bgColor="bg-white" path="My Cart" title="My Cart" />
 
 			<div className="container">
 				<div className="pb-20 pt-10 lg:py-24">
+					{/* Mobile list */}
 					<div className="block lg:hidden">
-						<div className="border-b pb-8 pt-4">
-							<Image
-								src="/assets/img/food-1.png"
-								alt="Food"
-								width={150}
-								height={150}
-							/>
-							<div className="mt-3 flex items-center justify-between">
-								<h5 className="text-heading-5 text-secondary-100">
-									Chococheese Cake
-								</h5>
-								<button className="group flex h-10 w-10 items-center justify-center rounded-full bg-primary-10 transition duration-200 hover:bg-primary-100">
-									<RxTrash
-										size={18}
-										className="text-[#FF0A0A] transition duration-200 group-hover:text-white"
+						{items.map((item) => (
+							<div key={item.id} className="border-b pb-8 pt-4">
+								{item.thumbnail && (
+									<Image
+										src={item.thumbnail}
+										alt={item.product_title || item.title}
+										width={150}
+										height={150}
+										className="h-[150px] w-[150px] rounded-2xl object-cover"
 									/>
-								</button>
-							</div>
-							<div className="mt-7 grid grid-cols-2">
-								<QuantityInput />
-								<div className="flex space-x-9">
-									<div>
-										<h6 className="text-heading-6 text-start text-secondary-100">
-											Price
-										</h6>
-										<span className="text-caption-2 text-primary-100">
-											$2.5
-										</span>
-									</div>
-									<div>
-										<h6 className="text-heading-6 text-start text-secondary-100">
-											Total
-										</h6>
-										<span className="text-caption-2 text-primary-100">
-											$2.5
-										</span>
+								)}
+								<div className="mt-3 flex items-center justify-between">
+									<h5 className="text-heading-5 text-secondary-100">
+										{item.product_title || item.title}
+									</h5>
+									<button
+										className="group flex h-10 w-10 items-center justify-center rounded-full bg-primary-10 transition duration-200 hover:bg-primary-100"
+										onClick={() => removeItem(item.id)}
+									>
+										<RxTrash
+											size={18}
+											className="text-[#FF0A0A] transition duration-200 group-hover:text-white"
+										/>
+									</button>
+								</div>
+								<div className="mt-7 grid grid-cols-2">
+									<QtyControl
+										quantity={item.quantity}
+										onChange={(q) => updateItem(item.id, q)}
+									/>
+									<div className="flex space-x-9">
+										<div>
+											<h6 className="text-heading-6 text-start text-secondary-100">
+												Price
+											</h6>
+											<span className="text-caption-2 text-primary-100">
+												{formatPrice(item.unit_price, currency)}
+											</span>
+										</div>
+										<div>
+											<h6 className="text-heading-6 text-start text-secondary-100">
+												Total
+											</h6>
+											<span className="text-caption-2 text-primary-100">
+												{formatPrice(item.total ?? item.unit_price * item.quantity, currency)}
+											</span>
+										</div>
 									</div>
 								</div>
 							</div>
-						</div>
-						<div className="border-b pb-8 pt-4">
-							<Image
-								src="/assets/img/food-2.png"
-								alt="Food"
-								width={150}
-								height={150}
-							/>
-							<div className="mt-3 flex items-center justify-between">
-								<h5 className="text-heading-5 text-secondary-100">
-									Pink Donuts
-								</h5>
-								<button className="group flex h-10 w-10 items-center justify-center rounded-full bg-primary-10 transition duration-200 hover:bg-primary-100">
-									<RxTrash
-										size={18}
-										className="text-[#FF0A0A] transition duration-200 group-hover:text-white"
-									/>
-								</button>
-							</div>
-							<div className="mt-7 grid grid-cols-2">
-								<QuantityInput />
-								<div className="flex space-x-9">
-									<div>
-										<h6 className="text-heading-6 text-start text-secondary-100">
-											Price
-										</h6>
-										<span className="text-caption-2 text-primary-100">
-											$2.8
-										</span>
-									</div>
-									<div>
-										<h6 className="text-heading-6 text-start text-secondary-100">
-											Total
-										</h6>
-										<span className="text-caption-2 text-primary-100">
-											$2.8
-										</span>
-									</div>
-								</div>
-							</div>
-						</div>
-						<div className="border-b pb-8 pt-4">
-							<Image
-								src="/assets/img/food-5.png"
-								alt="Food"
-								width={150}
-								height={150}
-							/>
-							<div className="mt-3 flex items-center justify-between">
-								<h5 className="text-heading-5 text-secondary-100">
-									Pink Sweet
-								</h5>
-								<button className="group flex h-10 w-10 items-center justify-center rounded-full bg-primary-10 transition duration-200 hover:bg-primary-100">
-									<RxTrash
-										size={18}
-										className="text-[#FF0A0A] transition duration-200 group-hover:text-white"
-									/>
-								</button>
-							</div>
-							<div className="mt-7 grid grid-cols-2">
-								<QuantityInput />
-								<div className="flex space-x-9">
-									<div>
-										<h6 className="text-heading-6 text-start text-secondary-100">
-											Price
-										</h6>
-										<span className="text-caption-2 text-primary-100">
-											$2.1
-										</span>
-									</div>
-									<div>
-										<h6 className="text-heading-6 text-start text-secondary-100">
-											Total
-										</h6>
-										<span className="text-caption-2 text-primary-100">
-											$2.1
-										</span>
-									</div>
-								</div>
-							</div>
-						</div>
+						))}
 					</div>
 
+					{/* Desktop table */}
 					<table className="hidden w-full table-auto lg:table">
 						<thead>
 							<tr>
@@ -154,104 +151,56 @@ export default function MyCart() {
 							</tr>
 						</thead>
 						<tbody>
-							<tr>
-								<td className="border-b py-6">
-									<div className="flex items-center space-x-3">
-										<Image
-											src="/assets/img/food-1.png"
-											alt="Food"
-											width={100}
-											height={100}
+							{items.map((item) => (
+								<tr key={item.id}>
+									<td className="border-b py-6">
+										<div className="flex items-center space-x-3">
+											{item.thumbnail && (
+												<Image
+													src={item.thumbnail}
+													alt={item.product_title || item.title}
+													width={100}
+													height={100}
+													className="h-[100px] w-[100px] rounded-2xl object-cover"
+												/>
+											)}
+											<h5 className="text-heading-5 text-secondary-100">
+												{item.product_title || item.title}
+											</h5>
+										</div>
+									</td>
+									<td className="border-b py-6">
+										<QtyControl
+											quantity={item.quantity}
+											onChange={(q) => updateItem(item.id, q)}
 										/>
-										<h5 className="text-heading-5 text-secondary-100">
-											Chococheese Cake
-										</h5>
-									</div>
-								</td>
-								<td className="border-b py-6">
-									<QuantityInput />
-								</td>
-								<td className="border-b py-6">
-									<span className="text-caption-2 text-primary-100">$2.5</span>
-								</td>
-								<td className="border-b py-6">
-									<span className="text-caption-2 text-primary-100">$2.5</span>
-								</td>
-								<td className="border-b py-6">
-									<button className="group flex h-[54px] w-[54px] items-center justify-center rounded-full bg-primary-10 transition duration-200 hover:bg-primary-100">
-										<RxTrash
-											size={24}
-											className="text-[#FF0A0A] transition duration-200 group-hover:text-white"
-										/>
-									</button>
-								</td>
-							</tr>
-							<tr>
-								<td className="border-b py-6">
-									<div className="flex items-center space-x-3">
-										<Image
-											src="/assets/img/food-2.png"
-											alt="Food"
-											width={100}
-											height={100}
-										/>
-										<h5 className="text-heading-5 text-secondary-100">
-											Pink Donuts
-										</h5>
-									</div>
-								</td>
-								<td className="border-b py-6">
-									<QuantityInput />
-								</td>
-								<td className="border-b py-6">
-									<span className="text-caption-2 text-primary-100">$2.8</span>
-								</td>
-								<td className="border-b py-6">
-									<span className="text-caption-2 text-primary-100">$2.8</span>
-								</td>
-								<td className="border-b py-6">
-									<button className="group flex h-[54px] w-[54px] items-center justify-center rounded-full bg-primary-10 transition duration-200 hover:bg-primary-100">
-										<RxTrash
-											size={24}
-											className="text-[#FF0A0A] transition duration-200 group-hover:text-white"
-										/>
-									</button>
-								</td>
-							</tr>
-							<tr>
-								<td className="border-b py-6">
-									<div className="flex items-center space-x-3">
-										<Image
-											src="/assets/img/food-5.png"
-											alt="Food"
-											width={100}
-											height={100}
-										/>
-										<h5 className="text-heading-5 text-secondary-100">
-											Pink Sweet
-										</h5>
-									</div>
-								</td>
-								<td className="border-b py-6">
-									<QuantityInput />
-								</td>
-								<td className="border-b py-6">
-									<span className="text-caption-2 text-primary-100">$2.1</span>
-								</td>
-								<td className="border-b py-6">
-									<span className="text-caption-2 text-primary-100">$2.1</span>
-								</td>
-								<td className="border-b py-6">
-									<button className="group flex h-[54px] w-[54px] items-center justify-center rounded-full bg-primary-10 transition duration-200 hover:bg-primary-100">
-										<RxTrash
-											size={24}
-											className="text-[#FF0A0A] transition duration-200 group-hover:text-white"
-										/>
-									</button>
-								</td>
-							</tr>
+									</td>
+									<td className="border-b py-6">
+										<span className="text-caption-2 text-primary-100">
+											{formatPrice(item.unit_price, currency)}
+										</span>
+									</td>
+									<td className="border-b py-6">
+										<span className="text-caption-2 text-primary-100">
+											{formatPrice(item.total ?? item.unit_price * item.quantity, currency)}
+										</span>
+									</td>
+									<td className="border-b py-6">
+										<button
+											className="group flex h-[54px] w-[54px] items-center justify-center rounded-full bg-primary-10 transition duration-200 hover:bg-primary-100"
+											onClick={() => removeItem(item.id)}
+										>
+											<RxTrash
+												size={24}
+												className="text-[#FF0A0A] transition duration-200 group-hover:text-white"
+											/>
+										</button>
+									</td>
+								</tr>
+							))}
 						</tbody>
 					</table>
+
 					<div className="mt-12 flex flex-col space-y-10 lg:flex-row lg:justify-between">
 						<div>
 							<h6 className="text-heading-6 text-secondary-100">Coupon</h6>
@@ -267,13 +216,19 @@ export default function MyCart() {
 						<div className="lg:w-1/3">
 							<div className="flex items-center justify-between">
 								<h6 className="text-heading-6 text-secondary-100">Subtotal</h6>
-								<span className="text-caption-2 text-primary-100">$7.4</span>
+								<span className="text-caption-2 text-primary-100">
+									{formatPrice(subtotal, currency)}
+								</span>
 							</div>
 							<div className="mt-10 flex items-center justify-between border-b border-secondary-10 pb-7">
 								<h4 className="text-heading-4 text-secondary-100">Total</h4>
-								<span className="text-caption-1 text-primary-100">$7.4</span>
+								<span className="text-caption-1 text-primary-100">
+									{formatPrice(total, currency)}
+								</span>
 							</div>
-							<button className="btn-pink-solid mt-8 w-full">Checkout</button>
+							<Link href="/checkout" className="btn-pink-solid mt-8 block w-full text-center">
+								Checkout
+							</Link>
 							<Link
 								href="/menu"
 								className="text-body-3-medium mt-6 flex space-x-1 text-primary-100"

@@ -28,16 +28,18 @@ export const handleDeliveryWorkflow = createWorkflow(
   function (input: WorkflowInput) {
     setTransactionIdStep(input.delivery_id);
 
-    notifyRestaurantStep(input.delivery_id);
-
-    awaitDriverClaimStep();
-
-    const { 
+    // Create the order as soon as the delivery is placed so it shows up in the
+    // Admin "Orders" page immediately (instead of only after a driver claims).
+    const {
       order,
       linkDef
     } = createOrderStep(input.delivery_id);
 
     createRemoteLinkStep(linkDef)
+
+    notifyRestaurantStep(input.delivery_id);
+
+    awaitDriverClaimStep();
 
     awaitStartPreparationStep();
 

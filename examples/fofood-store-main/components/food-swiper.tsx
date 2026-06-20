@@ -19,11 +19,11 @@ const FoodSwiper = ({ images }: { images: string[] }) => {
 			{images.map((image, index) => (
 				<SwiperSlide key={index}>
 					<Image
-						src={require(`@/public/assets/img/${image}`)}
+						src={image}
 						alt="Food Preview Image"
 						width={500}
 						height={500}
-						className="mx-auto"
+						className="mx-auto h-[500px] w-full rounded-3xl object-cover"
 					/>
 				</SwiperSlide>
 			))}

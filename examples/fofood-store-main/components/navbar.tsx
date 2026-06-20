@@ -7,12 +7,16 @@ import { usePathname } from "next/navigation";
 import { Menu, Transition } from "@headlessui/react";
 import { MdKeyboardArrowDown } from "react-icons/md";
 import { VscClose, VscMenu } from "react-icons/vsc";
-import { Buy, Heart } from "react-iconly";
+import { Buy, Heart, User } from "react-iconly";
 import Logo from "@/public/assets/img/logo-color.png";
 import navMenu from "@/public/json/nav-menu.json";
+import { useCart } from "@/lib/cart-context";
+import { useAuth } from "@/lib/auth-context";
 
 const Navbar = () => {
 	const pathname = usePathname();
+	const { itemCount } = useCart();
+	const { customer } = useAuth();
 
 	const [isOpen, setIsOpen] = useState(false);
 	const [isScrolling, setIsScrolling] = useState(false);
@@ -45,9 +49,14 @@ const Navbar = () => {
 					<div className="flex items-center space-x-2 lg:hidden">
 						<Link
 							href="/my-cart"
-							className="rounded-sm border border-secondary-100 p-1.5 transition duration-300 hover:border-primary-100 hover:bg-primary-100 hover:text-white"
+							className="relative rounded-sm border border-secondary-100 p-1.5 transition duration-300 hover:border-primary-100 hover:bg-primary-100 hover:text-white"
 						>
 							<Buy style={{ height: "21px" }} />
+							{itemCount > 0 && (
+								<span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-primary-100 text-[11px] font-bold text-white">
+									{itemCount}
+								</span>
+							)}
 						</Link>
 						<button
 							className="rounded-sm border border-secondary-100 px-3 py-1.5 transition duration-300 hover:border-primary-100 hover:bg-primary-100 hover:text-white"
@@ -153,6 +162,27 @@ const Navbar = () => {
 							>
 								<Buy style={{ height: "20px" }} />
 								<span>My Cart</span>
+								{itemCount > 0 && (
+									<span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-primary-100 px-1 text-[11px] font-bold text-white">
+										{itemCount}
+									</span>
+								)}
+							</Link>
+						</li>
+						<li className="lg:px-14">
+							<Link
+								href={customer ? "/account" : "/login"}
+								onClick={() => setIsOpen(false)}
+								className={`${
+									pathname.startsWith("/account") ||
+									pathname.startsWith("/login") ||
+									pathname.startsWith("/register")
+										? "text-primary-100"
+										: "text-secondary-100 hover:text-primary-100"
+								} text-body-2-medium flex items-center space-x-1 transition`}
+							>
+								<User style={{ height: "20px" }} />
+								<span>{customer ? customer.first_name || "Account" : "Login"}</span>
 							</Link>
 						</li>
 					</ul>
